@@ -1,24 +1,19 @@
 {
   "name": "midway-init",
-  "version": "1.4.3",
+  "version": "1.20.3",
   "dependencies": {
-    "co": "^4.6.0",
-    "egg-init": "^1.15.1",
-    "enquirer": "^2.3.0",
-    "yargs": "^13.2.1"
+    "chalk": "^3.0.0",
+    "enquirer": "^2.3.2",
+    "light-generator": "^1.4.0",
+    "yargs": "^15.0.0"
   },
   "main": "lib/command.js",
   "devDependencies": {
-    "coffee": "^5.2.1",
-    "eslint": "^5.14.1",
+    "eslint": "7",
     "eslint-config-egg": "^7.0.0",
-    "intelli-espower-loader": "^1.0.1",
-    "midway-bin": "^1.4.3",
-    "mm": "^2.4.1",
+    "midway-bin": "^1.20.3",
     "mz-modules": "^2.1.0",
-    "power-assert": "^1.6.1",
-    "proxy": "^0.2.4",
-    "rimraf": "^2.6.1"
+    "power-assert": "^1.6.1"
   },
   "keywords": [
     "midway",
@@ -31,7 +26,7 @@
   "files": [
     "bin",
     "lib",
-    "boilerplate"
+    "boilerplate.json"
   ],
   "scripts": {
     "lint": "eslint bin lib test",

@@ -1,6 +1,6 @@
 {
   "name": "midway-mock",
-  "version": "1.4.6",
+  "version": "1.20.3",
   "eggPlugin": {
     "name": "midway-mock"
   },
@@ -10,6 +10,7 @@
   "scripts": {
     "build": "npm run lint && midway-bin build -c",
     "lint": "../../node_modules/.bin/tslint --format prose -c ../../tslint.json --fix 'src/**/*.ts'",
+    "devtest": "midway-bin test --ts",
     "test": "npm run lint && midway-bin clean && midway-bin test --ts",
     "cov": "midway-bin cov --ts",
     "ci": "midway-bin test",
@@ -27,13 +28,14 @@
     "d.ts",
     "bootstrap.d.ts",
     "bootstrap.js",
+    "app",
     "config"
   ],
   "license": "MIT",
   "devDependencies": {
-    "@midwayjs/decorator": "^1.4.6",
-    "injection": "^1.4.1",
-    "midway-bin": "^1.4.3"
+    "@midwayjs/decorator": "^1.20.3",
+    "injection": "^1.8.0",
+    "midway-bin": "^1.20.3"
   },
   "dependencies": {
     "egg-mock": "^3.21.0",

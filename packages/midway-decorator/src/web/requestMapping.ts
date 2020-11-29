@@ -3,14 +3,14 @@
  */
 import { attachClassMetadata } from 'injection';
 import { WEB_ROUTER_KEY } from '../constant';
-import { WebMiddleware } from '../interface';
+import { KoaMiddlewareParamArray } from '../interface';
 
 export interface RouterOption {
   path?: string;
   requestMethod: string;
   routerName?: string;
   method: string;
-  middleware?: Array<string | WebMiddleware>;
+  middleware?: KoaMiddlewareParamArray;
 }
 
 export const RequestMethod = {
@@ -40,7 +40,7 @@ export interface RequestMappingMetadata {
   [PATH_METADATA]?: string;
   [METHOD_METADATA]: string;
   [ROUTER_NAME_METADATA]?: string;
-  [ROUTER_MIDDLEWARE]?: Array<string | WebMiddleware>;
+  [ROUTER_MIDDLEWARE]?: KoaMiddlewareParamArray;
 }
 
 export const RequestMapping = (
@@ -68,7 +68,7 @@ const createMappingDecorator = (method: string) => (
   path?: string,
   routerOptions: {
     routerName?: string;
-    middleware?: Array<string | WebMiddleware>;
+    middleware?: KoaMiddlewareParamArray;
   } = {middleware: []}
 ): MethodDecorator => {
   return RequestMapping({

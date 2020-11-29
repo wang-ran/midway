@@ -9,8 +9,10 @@ module.exports = {
     'examples',
     'docs',
     'run',
+    'cluster'
   ],
   dep: [
+    "egg-cluster",
   ],
   devdep: [
   ]

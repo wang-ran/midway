@@ -1,26 +1,30 @@
 import * as path from 'path';
 import { MidwayContainer } from './container';
-import { MidwayRequestContainer } from './requestContainer';
+
+function buildLoadDir(baseDir, dir) {
+  if (!path.isAbsolute(dir)) {
+    return path.join(baseDir, dir);
+  }
+  return dir;
+}
 
 export class ContainerLoader {
 
   baseDir;
   pluginContext;
-  applicationContext;
-  requestContext;
+  applicationContext: MidwayContainer;
   isTsMode;
+  preloadModules;
 
-  constructor({baseDir, isTsMode = true}) {
+  constructor({baseDir, isTsMode = true, preloadModules = []}) {
     this.baseDir = baseDir;
     this.isTsMode = isTsMode;
+    this.preloadModules = preloadModules;
   }
 
   initialize() {
-    this.pluginContext = new MidwayContainer();
-    this.applicationContext = new MidwayContainer(this.baseDir);
-    this.requestContext = new MidwayRequestContainer(this.applicationContext);
-    // put requestContext to applicationContext
-    this.applicationContext.registerObject('requestContext', this.requestContext);
+    this.pluginContext = new MidwayContainer(this.baseDir);
+    this.applicationContext = new MidwayContainer(this.baseDir, undefined, this.isTsMode);
     this.applicationContext.registerObject('baseDir', this.baseDir);
     this.applicationContext.registerObject('isTsMode', this.isTsMode);
   }
@@ -33,24 +37,12 @@ export class ContainerLoader {
     return this.pluginContext;
   }
 
-  getRequestContext() {
-    return this.requestContext;
-  }
-
-  registerAllHook(hookKey, hookHandler) {
-    this.registerApplicationHook(hookKey, hookHandler);
-    this.registerRequestHook(hookKey, hookHandler);
-  }
-
-  registerApplicationHook(hookKey, hookHandler) {
+  registerHook(hookKey, hookHandler) {
     this.applicationContext.registerDataHandler(hookKey, hookHandler);
   }
 
-  registerRequestHook(hookKey, hookHandler) {
-    this.requestContext.registerDataHandler(hookKey, hookHandler);
-  }
-
   loadDirectory(loadOpts: {
+    baseDir?: string;
     loadDir?: string[];
     disableAutoLoad?: boolean;
     pattern?: string;
@@ -62,30 +54,30 @@ export class ContainerLoader {
       loadOpts.disableAutoLoad = true;
     }
 
-    // 如果没有关闭autoLoad 则进行load
+    // if not disable auto load
     if (!loadOpts.disableAutoLoad) {
-      const defaultLoadDir = this.isTsMode ? [this.baseDir] : ['app', 'lib'];
+      // use baseDir in parameter first
+      const baseDir = loadOpts.baseDir || this.baseDir;
+      const defaultLoadDir = this.isTsMode ? [baseDir] : ['app', 'lib'];
       this.applicationContext.load({
         loadDir: (loadOpts.loadDir || defaultLoadDir).map(dir => {
-          return this.buildLoadDir(dir);
+          return buildLoadDir(baseDir, dir);
         }),
         pattern: loadOpts.pattern,
         ignore: loadOpts.ignore
       });
+    }
+
+    if (this.preloadModules && this.preloadModules.length) {
+      for (const preloadModule of this.preloadModules) {
+        this.applicationContext.bindClass(preloadModule);
+      }
     }
   }
 
   async refresh() {
     await this.pluginContext.ready();
     await this.applicationContext.ready();
-    await this.requestContext.ready();
-  }
-
-  private buildLoadDir(dir) {
-    if (!path.isAbsolute(dir)) {
-      return path.join(this.baseDir, dir);
-    }
-    return dir;
   }
 
 }

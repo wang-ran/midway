@@ -1,9 +1,9 @@
 export * from 'injection';
 export * from 'midway-core';
 export * from '@midwayjs/decorator';
+export * from './interface';
 export {AgentWorkerLoader, AppWorkerLoader} from './loader/loader';
 export {Application, Agent} from './midway';
-export {BaseController} from './baseController';
 export {MidwayWebLoader} from './loader/webLoader';
 
 export {
@@ -23,6 +23,10 @@ export {
   Request,
   Response,
   Router,
+  Service,
+  Boot,
+  IBoot,
+  IgnoreOrMatch,
 } from 'egg';
 export {
   LoggerLevel as EggLoggerLevel,

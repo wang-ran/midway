@@ -127,9 +127,40 @@ midway-bin doc
 
 ## midway-init
 
-提供了基础的 midway 应用脚手架，后续会增加其他模板。
+提供了基础的 midway 应用脚手架，后续会不断增加其他模板。
 
 ```bash
 npm install -g midway-init
 midway-init
+```
+
+可以通过内建的命令创建脚手架
+
+```bash
+midway-init -h                                          // 帮助文档
+midway-init --dir my_project                            // 在当前目录下的 my_project 子目录创建脚手架
+midway-init --type midway-ts                            // 从内置脚手架类型 midway-ts 创建目录
+midway-init --template ../custom_boilerplate            // 从本地的特地目录创建脚手架
+midway-init --package midway-boilerplate-typescript     // 从 npm 包创建脚手架
+midway-init --registry china/npm/registry.cnpmjs.org    // 从不同的 registry 获取 npm 包，和 --package 合用
+```
+
+## tslint-midway-contrib
+
+midway 对 Typescript 应用提供了简单的 tslint 规则包，只需要在 tslint.json 中做简单的继承，如果有其他的需求
+
+```json
+// package.json
+  "devDependencies": {
+    "tslint-midway-contrib": "1",
+  }
+```
+
+```json
+// tslint.json
+{
+  "extends": [
+    "tslint-midway-contrib"
+  ]
+}
 ```

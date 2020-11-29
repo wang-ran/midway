@@ -10,6 +10,7 @@
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/midwayjs/midway/pulls)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/856737478fa94e78bce39d5fc2315cec)](https://www.codacy.com/app/czy88840616/midway?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=midwayjs/midway&amp;utm_campaign=Badge_Grade)
 [![Backers on Open Collective](https://opencollective.com/midway/backers/badge.svg)](#backers) [![Sponsors on Open Collective](https://opencollective.com/midway/sponsors/badge.svg)](#sponsors)
+[![Gitpod Ready-to-Code](https://img.shields.io/badge/Gitpod-Ready--to--Code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/midwayjs/midway) 
 
 Midway is a Node.js Web framework written by typescript, which uses the IoC injection mechanism to decouple the business logic of the application and make the development of large Node.js application easier and more natural.
 
@@ -18,7 +19,7 @@ Midway is a Node.js Web framework written by typescript, which uses the IoC inje
 ```bash
 $ npm install midway --save
 ```
-Node.js >= 8.0.0 required.
+Node.js >= 10.16.0 required.
 
 ## Features
 
@@ -54,17 +55,17 @@ See [midway-examples](https://github.com/midwayjs/midway-examples).
 
 midway is comprised of many specialized packages. This repository contains all these packages. Below you will find a summary of each package.
 
-| Package | Version | Dependencies | DevDependencies | quality |
-|--------|-------|------------|----------|----------|
-| [`midway`](https://github.com/midwayjs/midway/tree/master/packages/midway) | [![npm (scoped)](https://img.shields.io/npm/v/midway.svg?maxAge=86400)](https://github.com/midwayjs/midway/tree/master/packages/midway/CHANGELOG.md) | [![Dependency Status](https://david-dm.org/midwayjs/midway.svg?path=packages/midway)](https://david-dm.org/midwayjs/midway.svg?path=packages/midway) | [![devDependency Status](https://david-dm.org/midwayjs/midway/dev-status.svg?path=packages/midway)](https://david-dm.org/midwayjs/midway?path=packages/midway#info=devDependencies) | [![Package Quality](https://npm.packagequality.com/shield/midway.svg)](https://packagequality.com/#?package=midway) |
-| [`midway-web`](https://github.com/midwayjs/midway/tree/master/packages/midway-web) | [![npm (scoped)](https://img.shields.io/npm/v/midway-web.svg?maxAge=86400)](https://github.com/midwayjs/midway/tree/master/midway-web/CHANGELOG.md) | [![Dependency Status](https://david-dm.org/midwayjs/midway.svg?path=packages/midway-web)](https://david-dm.org/midwayjs/midway.svg?path=packages/midway-web) | [![devDependency Status](https://david-dm.org/midwayjs/midway/dev-status.svg?path=packages/midway-web)](https://david-dm.org/midwayjs/midway?path=packages/midway-web#info=devDependencies) | [![Package Quality](https://npm.packagequality.com/shield/midway-web.svg)](https://packagequality.com/#?package=midway-web)| 
-| [`midway-core`](https://github.com/midwayjs/midway/tree/master/packages/midway-core) | [![npm (scoped)](https://img.shields.io/npm/v/midway-core.svg?maxAge=86400)](https://github.com/midwayjs/midway/tree/master/midway-core/CHANGELOG.md) | [![Dependency Status](https://david-dm.org/midwayjs/midway.svg?path=packages/midway-core)](https://david-dm.org/midwayjs/midway.svg?path=packages/midway-core) | [![devDependency Status](https://david-dm.org/midwayjs/midway/dev-status.svg?path=packages/midway-core)](https://david-dm.org/midwayjs/midway?path=packages/midway-core#info=devDependencies) | [![Package Quality](https://npm.packagequality.com/shield/midway-core.svg)](https://packagequality.com/#?package=midway-core) |
-| [`midway-mock`](https://github.com/midwayjs/midway/tree/master/packages/midway-mock) | [![npm (scoped)](https://img.shields.io/npm/v/midway-mock.svg?maxAge=86400)](https://github.com/midwayjs/midway/tree/master/midway-mock/CHANGELOG.md) | [![Dependency Status](https://david-dm.org/midwayjs/midway.svg?path=packages/midway-mock)](https://david-dm.org/midwayjs/midway.svg?path=packages/midway-mock) | [![devDependency Status](https://david-dm.org/midwayjs/midway/dev-status.svg?path=packages/midway-mock)](https://david-dm.org/midwayjs/midway?path=packages/midway-mock#info=devDependencies) | [![Package Quality](https://npm.packagequality.com/shield/midway-mock.svg)](https://packagequality.com/#?package=midway-mock) |
-| [`midway-init`](https://github.com/midwayjs/midway/tree/master/packages/midway-init) | [![npm (scoped)](https://img.shields.io/npm/v/midway-init.svg?maxAge=86400)](https://github.com/midwayjs/midway/tree/master/midway-init/CHANGELOG.md) | [![Dependency Status](https://david-dm.org/midwayjs/midway.svg?path=packages/midway-init)](https://david-dm.org/midwayjs/midway.svg?path=packages/midway-init) |  [![devDependency Status](https://david-dm.org/midwayjs/midway/dev-status.svg?path=packages/midway-init)](https://david-dm.org/midwayjs/midway?path=packages/midway-init#info=devDependencies) | [![Package Quality](https://npm.packagequality.com/shield/midway-init.svg)](https://packagequality.com/#?package=midway-init) |
-| [`midway-bin`](https://github.com/midwayjs/midway/tree/master/packages/midway-bin) | [![npm (scoped)](https://img.shields.io/npm/v/midway-bin.svg?maxAge=86400)](https://github.com/midwayjs/midway/tree/master/midway-bin/CHANGELOG.md) | [![Dependency Status](https://david-dm.org/midwayjs/midway.svg?path=packages/midway-bin)](https://david-dm.org/midwayjs/midway.svg?path=packages/midway-bin) | [![devDependency Status](https://david-dm.org/midwayjs/midway/dev-status.svg?path=packages/midway-bin)](https://david-dm.org/midwayjs/midway?path=packages/midway-bin#info=devDependencies) | [![Package Quality](https://npm.packagequality.com/shield/midway-bin.svg)](https://packagequality.com/#?package=midway-bin) |
-| [`midway-schedule`](https://github.com/midwayjs/midway/tree/master/packages/midway-schedule) | [![npm (scoped)](https://img.shields.io/npm/v/midway-schedule.svg?maxAge=86400)](https://github.com/midwayjs/midway/tree/master/midway-schedule/CHANGELOG.md) | [![Dependency Status](https://david-dm.org/midwayjs/midway.svg?path=packages/midway-schedule)](https://david-dm.org/midwayjs/midway.svg?path=packages/midway-schedule) | [![devDependency Status](https://david-dm.org/midwayjs/midway/dev-status.svg?path=packages/midway-schedule)](https://david-dm.org/midwayjs/midway?path=packages/midway-schedule#info=devDependencies) | [![Package Quality](https://npm.packagequality.com/shield/midway-schedule.svg)](https://packagequality.com/#?package=midway-schedule)|
+| Package | Version | quality |
+|--------|-------|------------|
+| [`midway`] | [![midway-svg]][midway-ch] | [![midway-q-svg]][midway-q-link] |
+| [`midway-web`] | [![web-svg]][web-ch] |  [![web-q-svg]][web-q-link] | 
+| [`midway-core`] | [![core-svg]][core-ch] | [![core-q-svg]][core-q-link] |
+| [`midway-mock`] | [![mock-svg]][mock-ch]  | [![mock-q-svg]][mock-q-link] |
+| [`midway-init`] | [![init-svg]][init-ch]  | [![init-q-svg]][init-q-link] |
+| [`midway-bin`] | [![bin-svg]][bin-ch] | [![bin-q-svg]][bin-q-link] |
+| [`midway-schedule`] | [![sch-svg]][sch-ch] | [![sch-q-svg]][sch-q-link] |
 
-Globally: [![Build Status](https://img.shields.io/travis/midwayjs/midway/master.svg?style=flat)](https://travis-ci.org/midwayjs/midway) [![devDependency Status](https://david-dm.org/midwayjs/midway/dev-status.svg)](https://david-dm.org/midwayjs/midway#info=devDependencies)
+Globally: [![Build Status](https://img.shields.io/travis/midwayjs/midway/master.svg?style=flat)](https://travis-ci.org/midwayjs/midway) 
 
 ## Contributors
 
@@ -78,3 +79,75 @@ This project exists thanks to all the people who contribute. [[Contribute](CONTR
 ## License
 
 [MIT](http://github.com/midwayjs/midway/blob/master/LICENSE)
+
+
+[`midway`]: https://github.com/midwayjs/midway/tree/master/packages/midway
+[`midway-web`]: https://github.com/midwayjs/midway/tree/master/packages/midway-web
+[`midway-core`]: https://github.com/midwayjs/midway/tree/master/packages/midway-core
+[`midway-mock`]: https://github.com/midwayjs/midway/tree/master/packages/midway-mock
+[`midway-init`]: https://github.com/midwayjs/midway/tree/master/packages/midway-init
+[`midway-bin`]: https://github.com/midwayjs/midway/tree/master/packages/midway-bin
+[`midway-schedule`]: https://github.com/midwayjs/midway/tree/master/packages/midway-schedule
+
+[midway-svg]: https://img.shields.io/npm/v/midway.svg?maxAge=86400
+[midway-ch]: https://github.com/midwayjs/midway/tree/master/packages/midway/CHANGELOG.md
+[midway-d-svg]: https://david-dm.org/midwayjs/midway.svg?path=packages/midway
+[midway-d-link]: https://david-dm.org/midwayjs/midway.svg?path=packages/midway
+[midway-dd-svg]: https://david-dm.org/midwayjs/midway/dev-status.svg?path=packages/midway
+[midway-dd-link]: https://david-dm.org/midwayjs/midway?path=packages/midway#info=devDependencies
+[midway-q-svg]: https://npm.packagequality.com/shield/midway.svg
+[midway-q-link]: https://packagequality.com/#?package=midway
+
+[web-svg]: https://img.shields.io/npm/v/midway-web.svg?maxAge=86400
+[web-ch]: https://github.com/midwayjs/midway/tree/master/midway-web/CHANGELOG.md
+[web-d-svg]: https://david-dm.org/midwayjs/midway.svg?path=packages/midway-web
+[web-d-link]: https://david-dm.org/midwayjs/midway.svg?path=packages/midway-web
+[web-dd-svg]: https://david-dm.org/midwayjs/midway/dev-status.svg?path=packages/midway-web
+[web-dd-link]: https://david-dm.org/midwayjs/midway?path=packages/midway-web#info=devDependencies
+[web-q-svg]: https://npm.packagequality.com/shield/midway-web.svg
+[web-q-link]: https://packagequality.com/#?package=midway-web
+
+[core-svg]: https://img.shields.io/npm/v/midway-core.svg?maxAge=86400
+[core-ch]: https://github.com/midwayjs/midway/tree/master/midway-core/CHANGELOG.md
+[core-d-svg]: https://david-dm.org/midwayjs/midway.svg?path=packages/midway-core
+[core-d-link]: https://david-dm.org/midwayjs/midway.svg?path=packages/midway-core
+[core-dd-svg]: https://david-dm.org/midwayjs/midway/dev-status.svg?path=packages/midway-core
+[core-dd-link]: https://david-dm.org/midwayjs/midway?path=packages/midway-core#info=devDependencies
+[core-q-svg]: https://npm.packagequality.com/shield/midway-core.svg
+[core-q-link]: https://packagequality.com/#?package=midway-core
+
+[mock-svg]: https://img.shields.io/npm/v/midway-mock.svg?maxAge=86400
+[mock-ch]: https://github.com/midwayjs/midway/tree/master/midway-mock/CHANGELOG.md
+[mock-d-svg]: https://david-dm.org/midwayjs/midway.svg?path=packages/midway-mock
+[mock-d-link]: https://david-dm.org/midwayjs/midway.svg?path=packages/midway-mock
+[mock-dd-svg]: https://david-dm.org/midwayjs/midway/dev-status.svg?path=packages/midway-mock
+[mock-dd-link]: https://david-dm.org/midwayjs/midway?path=packages/midway-mock#info=devDependencies
+[mock-q-svg]: https://npm.packagequality.com/shield/midway-mock.svg
+[mock-q-link]: https://packagequality.com/#?package=midway-mock
+
+[init-svg]: https://img.shields.io/npm/v/midway-init.svg?maxAge=86400
+[init-ch]: https://github.com/midwayjs/midway/tree/master/midway-init/CHANGELOG.md
+[init-d-svg]: https://david-dm.org/midwayjs/midway.svg?path=packages/midway-init
+[init-d-link]: https://david-dm.org/midwayjs/midway.svg?path=packages/midway-init
+[init-dd-svg]: https://david-dm.org/midwayjs/midway/dev-status.svg?path=packages/midway-init
+[init-dd-link]: https://david-dm.org/midwayjs/midway?path=packages/midway-init#info=devDependencies
+[init-q-svg]: https://npm.packagequality.com/shield/midway-init.svg
+[init-q-link]: https://packagequality.com/#?package=midway-init
+
+[bin-svg]: https://img.shields.io/npm/v/midway-bin.svg?maxAge=86400
+[bin-ch]: https://github.com/midwayjs/midway/tree/master/midway-bin/CHANGELOG.md
+[bin-d-svg]: https://david-dm.org/midwayjs/midway.svg?path=packages/midway-bin
+[bin-d-link]: https://david-dm.org/midwayjs/midway.svg?path=packages/midway-bin
+[bin-dd-svg]: https://david-dm.org/midwayjs/midway/dev-status.svg?path=packages/midway-bin
+[bin-dd-link]: https://david-dm.org/midwayjs/midway?path=packages/midway-bin#info=devDependencies
+[bin-q-svg]: https://npm.packagequality.com/shield/midway-bin.svg
+[bin-q-link]: https://packagequality.com/#?package=midway-bin
+
+[sch-svg]: https://img.shields.io/npm/v/midway-schedule.svg?maxAge=86400
+[sch-ch]: https://github.com/midwayjs/midway/tree/master/midway-schedule/CHANGELOG.md
+[sch-d-svg]: https://david-dm.org/midwayjs/midway.svg?path=packages/midway-schedule
+[sch-d-link]: https://david-dm.org/midwayjs/midway.svg?path=packages/midway-schedule
+[sch-dd-svg]: https://david-dm.org/midwayjs/midway/dev-status.svg?path=packages/midway-schedule
+[sch-dd-link]: https://david-dm.org/midwayjs/midway?path=packages/midway-schedule#info=devDependencies
+[sch-q-svg]: https://npm.packagequality.com/shield/midway-schedule.svg
+[sch-q-link]: https://packagequality.com/#?package=midway-schedule

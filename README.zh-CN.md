@@ -10,14 +10,14 @@
 [![Known Vulnerabilities](https://snyk.io/test/npm/midway/badge.svg)](https://snyk.io/test/npm/midway)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/midwayjs/midway/pulls)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/856737478fa94e78bce39d5fc2315cec)](https://www.codacy.com/app/czy88840616/midway?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=midwayjs/midway&amp;utm_campaign=Badge_Grade)
-
+[![Gitpod Ready-to-Code](https://img.shields.io/badge/Gitpod-Ready--to--Code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/midwayjs/midway) 
 
 ## 安装
 
 ```bash
 $ npm install midway --save
 ```
-需要 Node.js >= 8.0.0。
+需要 Node.js >= 10.16.0。
 
 ## 特性
 

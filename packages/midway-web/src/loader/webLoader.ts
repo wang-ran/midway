@@ -5,15 +5,17 @@ import {
   PRIORITY_KEY,
   RouterOption,
   WEB_ROUTER_KEY,
-  WebMiddleware
+  WEB_ROUTER_PARAM_KEY,
+  RouterParamValue,
 } from '@midwayjs/decorator';
 import * as extend from 'extend2';
 import * as fs from 'fs';
-import { getClassMetadata, getProviderId, listModule } from 'injection';
-import { ContainerLoader, MidwayHandlerKey } from 'midway-core';
+import { getClassMetadata, getPropertyDataFromClass, getProviderId, listModule } from 'injection';
+import { ContainerLoader, MidwayHandlerKey, MidwayContainer } from 'midway-core';
 import * as path from 'path';
-import { MidwayLoaderOptions } from '../interface';
-import { isTypeScriptEnvironment } from '../utils';
+import { Middleware, MiddlewareParamArray, MidwayLoaderOptions, WebMiddleware } from '../interface';
+import { isTypeScriptEnvironment, safelyGet } from '../utils';
+import { EggAppInfo } from 'egg';
 
 const debug = require('debug')(`midway:loader:${process.pid}`);
 const EggLoader = require('egg-core').EggLoader;
@@ -22,12 +24,15 @@ const TS_SRC_DIR = 'src';
 const TS_TARGET_DIR = 'dist';
 
 export class MidwayWebLoader extends EggLoader {
+  public baseDir: string;
+  public appDir: string;
+  public appInfo: EggAppInfo;
   private controllerIds: string[] = [];
-  private prioritySortRouters: Array<{
+  public prioritySortRouters: Array<{
     priority: number,
     router: Router,
   }> = [];
-  private containerLoader;
+  private containerLoader: ContainerLoader;
 
   constructor(options: MidwayLoaderOptions) {
     super(options);
@@ -36,49 +41,58 @@ export class MidwayWebLoader extends EggLoader {
   /**
    * 判断是否是 ts 模式，在构造器内就会被执行
    */
-  get isTsMode() {
-    return this.app.options.typescript;
+  get isTsMode(): boolean {
+    // if egg ts mode equal true and midway will be disabled
+    return process.env.EGG_TS_MODE !== 'true' && !!this.app.options.typescript;
   }
 
-  get applicationContext() {
+  get applicationContext(): MidwayContainer {
     return this.containerLoader.getApplicationContext();
   }
 
-  get pluginContext() {
+  get pluginContext(): any {
     return this.containerLoader.getPluginContext();
   }
 
   // loadPlugin -> loadConfig -> afterLoadConfig
-  protected loadConfig() {
+  protected loadConfig(): void {
     this.loadPlugin();
     super.loadConfig();
   }
+
   // Get the real plugin path
-  protected getPluginPath(plugin) {
-    if (plugin.path) {
+  protected getPluginPath(plugin: any): string {
+    if (plugin && plugin.path) {
       return plugin.path;
     }
 
-    const name = plugin.package || plugin.name;
-    const lookupDirs = [];
+    const name: string = plugin.package || plugin.name;
+    const lookupDirs: Set<string> = new Set();
 
     // 尝试在以下目录找到匹配的插件
     //  -> {APP_PATH}/node_modules
     //    -> {EGG_PATH}/node_modules
     //      -> $CWD/node_modules
-    lookupDirs.push(path.join(this.appDir, 'node_modules'));
+    lookupDirs.add(path.join(this.appDir, 'node_modules'));
 
     // 到 egg 中查找，优先从外往里查找
     for (let i = this.eggPaths.length - 1; i >= 0; i--) {
-      const eggPath = this.eggPaths[i];
-      lookupDirs.push(path.join(eggPath, 'node_modules'));
+      const eggPath: string = this.eggPaths[i];
+      lookupDirs.add(path.join(eggPath, 'node_modules'));
     }
 
     // should find the $cwd/node_modules when test the plugins under npm3
-    lookupDirs.push(path.join(process.cwd(), 'node_modules'));
+    lookupDirs.add(path.join(process.cwd(), 'node_modules'));
+
+    // support monorepo
+    const monorepoPath = path.join(__dirname, '../../../');
+
+    if (path.basename(monorepoPath) === 'node_modules') {
+      lookupDirs.add(monorepoPath);
+    }
 
     if (process.env.PLUGIN_PATH) {
-      lookupDirs.push(path.join(process.env.PLUGIN_PATH, 'node_modules'));
+      lookupDirs.add(path.join(process.env.PLUGIN_PATH, 'node_modules'));
     }
 
     for (let dir of lookupDirs) {
@@ -88,10 +102,10 @@ export class MidwayWebLoader extends EggLoader {
       }
     }
 
-    throw new Error(`Can not find plugin ${name} in "${lookupDirs.join(', ')}"`);
+    throw new Error(`Can not find plugin ${name} in "${Array.from(lookupDirs).join(', ')}"`);
   }
 
-  protected registerTypescriptDirectory() {
+  protected registerTypescriptDirectory(): void {
     const app = this.app;
     // 处理 ts 的初始路径
     this.appDir = this.baseDir = app.options.baseDir;
@@ -111,7 +125,7 @@ export class MidwayWebLoader extends EggLoader {
     }
   }
 
-  protected getEggPaths() {
+  protected getEggPaths(): string[] {
     if (!this.appDir) {
       // register appDir here
       this.registerTypescriptDirectory();
@@ -119,8 +133,8 @@ export class MidwayWebLoader extends EggLoader {
     return super.getEggPaths();
   }
 
-  protected getServerEnv() {
-    let serverEnv;
+  protected getServerEnv(): string {
+    let serverEnv: string;
 
     const envPath = path.join(this.appDir, 'config/env');
     if (fs.existsSync(envPath)) {
@@ -134,9 +148,9 @@ export class MidwayWebLoader extends EggLoader {
     return serverEnv;
   }
 
-  protected getAppInfo() {
+  protected getAppInfo(): EggAppInfo {
     if (!this.appInfo) {
-      const appInfo = super.getAppInfo();
+      const appInfo: EggAppInfo | undefined = super.getAppInfo();
       // ROOT == HOME in prod env
       this.appInfo = extend(true, appInfo, {
         root: appInfo.env === 'local' || appInfo.env === 'unittest' ? this.appDir : appInfo.root,
@@ -146,13 +160,17 @@ export class MidwayWebLoader extends EggLoader {
     return this.appInfo;
   }
 
-  protected loadApplicationContext() {
+  protected loadApplicationContext(): void {
     // this.app.options.container 测试用例编写方便点
     const containerConfig = this.config.container || this.app.options.container || {};
+    if (!containerConfig.loadDir) {
+      // 如果没有配置，默认就把扫描目录改到 /src or /dist
+      containerConfig.baseDir = this.baseDir;
+    }
     // 在 super constructor 中会调用到getAppInfo，之后会被赋值
     // 如果是typescript会加上 dist 或者 src 目录
     this.containerLoader = new ContainerLoader({
-      baseDir: this.baseDir,
+      baseDir: this.appDir,
       isTsMode: this.isTsMode
     });
     this.containerLoader.initialize();
@@ -161,15 +179,15 @@ export class MidwayWebLoader extends EggLoader {
     this.containerLoader.loadDirectory(containerConfig);
 
     // register handler for container
-    this.containerLoader.registerAllHook(MidwayHandlerKey.CONFIG, (key) => {
-      return this.config[key];
+    this.containerLoader.registerHook(MidwayHandlerKey.CONFIG, (key: string) => {
+      return safelyGet(key, this.config);
     });
 
-    this.containerLoader.registerAllHook(MidwayHandlerKey.PLUGIN, (key) => {
+    this.containerLoader.registerHook(MidwayHandlerKey.PLUGIN, (key: string) => {
       return this.app[key] || this.pluginContext.get(key);
     });
 
-    this.containerLoader.registerAllHook(MidwayHandlerKey.LOGGER, (key) => {
+    this.containerLoader.registerHook(MidwayHandlerKey.LOGGER, (key: string) => {
       if (this.app.getLogger) {
         return this.app.getLogger(key);
       }
@@ -177,79 +195,110 @@ export class MidwayWebLoader extends EggLoader {
     });
   }
 
-  protected async preRegisterRouter(target, controllerId) {
-    const app = this.app;
+  protected async preRegisterRouter(target: any, controllerId: string): Promise<void> {
     const controllerOption: ControllerOption = getClassMetadata(CONTROLLER_KEY, target);
-    let newRouter;
-    if (controllerOption.prefix) {
-      newRouter = new Router({
-        sensitive: true,
-      }, app);
-      newRouter.prefix(controllerOption.prefix);
-      // implement @middleware
-      const middlewares = controllerOption.routerOptions.middleware;
-      if (middlewares && middlewares.length) {
-        for (const middleware of middlewares) {
-          const middlewareImpl: WebMiddleware = await this.applicationContext.getAsync(middleware);
-          if (middlewareImpl && middlewareImpl.resolve) {
-            newRouter.use(middlewareImpl.resolve());
-          }
-        }
-      }
+    const newRouter = this.createEggRouter(controllerOption);
+
+    if (newRouter) {
+      // implement middleware in controller
+      const middlewares: MiddlewareParamArray | void = controllerOption.routerOptions.middleware;
+      await this.handlerWebMiddleware(middlewares, (middlewareImpl: Middleware) => {
+        newRouter.use(middlewareImpl);
+      });
 
       // implement @get @post
       const webRouterInfo: RouterOption[] = getClassMetadata(WEB_ROUTER_KEY, target);
+
       if (webRouterInfo && typeof webRouterInfo[Symbol.iterator] === 'function') {
         for (const webRouter of webRouterInfo) {
           // get middleware
-          const middlewares = webRouter.middleware;
-          const methodMiddlwares = [];
-          if (middlewares && middlewares.length) {
-            for (const middleware of middlewares) {
-              const middlewareImpl: WebMiddleware = await this.applicationContext.getAsync(middleware);
-              if (middlewareImpl && middlewareImpl.resolve) {
-                methodMiddlwares.push(middlewareImpl.resolve());
-              }
-            }
-          }
+          const middlewares2: MiddlewareParamArray | void = webRouter.middleware;
+          const methodMiddlwares: Middleware[] = [];
+
+          await this.handlerWebMiddleware(middlewares2, (middlewareImpl: Middleware) => {
+            methodMiddlwares.push(middlewareImpl);
+          });
+
+          // implement @body @query @param @body
+          const routeArgsInfo = getPropertyDataFromClass(WEB_ROUTER_PARAM_KEY, target, webRouter.method) || [];
 
           const routerArgs = [
             webRouter.routerName,
             webRouter.path,
             ...methodMiddlwares,
-            this.generateController(`${controllerId}.${webRouter.method}`)
-          ].concat(methodMiddlwares);
+            this.generateController(
+              `${controllerId}.${webRouter.method}`,
+              routeArgsInfo,
+            )
+          ];
 
           // apply controller from request context
           newRouter[webRouter.requestMethod].apply(newRouter, routerArgs);
         }
       }
-    }
 
-    // sort for priority
-    if (newRouter) {
+      // sort for priority
       const priority = getClassMetadata(PRIORITY_KEY, target);
       this.prioritySortRouters.push({
         priority: priority || 0,
         router: newRouter,
       });
     }
+
+  }
+
+  private async handlerWebMiddleware(
+    middlewares: MiddlewareParamArray | void,
+    handlerCallback: (middlewareImpl: Middleware) => void,
+  ): Promise<void> {
+
+    if (middlewares && middlewares.length) {
+      for (const middleware of middlewares) {
+        if (typeof middleware === 'function') {
+          // web function middleware
+          handlerCallback(middleware);
+        } else {
+          const middlewareImpl: WebMiddleware | void = await this.applicationContext.getAsync(middleware);
+          if (middlewareImpl && typeof middlewareImpl.resolve === 'function') {
+            handlerCallback(middlewareImpl.resolve());
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * @param controllerOption
+   */
+  private createEggRouter(controllerOption: ControllerOption) {
+    const { prefix, routerOptions: { sensitive } } = controllerOption;
+    if (prefix) {
+      const router = new Router({ sensitive }, this.app);
+      router.prefix(prefix);
+      return router;
+    }
+    return null;
   }
 
   protected async refreshContext(): Promise<void> {
     await this.containerLoader.refresh();
   }
+
   /**
    * wrap controller string to middleware function
-   * @param controllerMapping like xxxController.index
+   * @param controllerMapping like FooController.index
    */
-  public generateController(controllerMapping: string) {
-    const mappingSplit = controllerMapping.split('.');
-    const controllerId = mappingSplit[0];
-    const methodName = mappingSplit[1];
+  public generateController(controllerMapping: string, routeArgsInfo?: RouterParamValue[]): Middleware {
+    const [controllerId, methodName] = controllerMapping.split('.');
     return async (ctx, next) => {
+      const args = [ctx, next];
+      if (Array.isArray(routeArgsInfo)) {
+        await Promise.all(routeArgsInfo.map(async ({ index, extractValue }) => {
+          args[index] = await extractValue(ctx, next);
+        }));
+      }
       const controller = await ctx.requestContext.getAsync(controllerId);
-      return controller[methodName].call(controller, ctx, next);
+      return controller[methodName].apply(controller, args);
     };
   }
 

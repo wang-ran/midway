@@ -12,16 +12,16 @@ Since 2013, Midway has kept upgrading almost every year, from Express to Koa1/2 
 Nowadays, Node.js goes ahead of the simple single-page application, not only in the Alibaba Group but also the Community, and go toward to the full-stack. With this trending, the MidwayJs Team come with the responsibility of supporting the Alibaba Group's Node.js Applications, and we also provide tools like [`Pandora.js`](https://midwayjs.org/pandora/), [`Sandbox`](https://github.com/midwayjs/sandbox) to help Applications become more stable and reliable.
 
 During 2017, we upgraded the Midway core to Koa2 to support async/await by Midway v5.3 inside the Alibaba Group.
-''
+
 At the same year, we started planning to separate the monitoring and statistic function from the framework, which became the Pandora.js, a tool that is not just serve the Midway, but can be general using for any Node.js applications.
 
-In 2018, the MidwayJs Team improved the development experience from the language level by Typescript, and released Midway v6.0 which is the 1.0 open source version to community.
+In 2018, the MidwayJs Team improved the development experience from the language level by TypeScript, and released Midway v6.0 which is the 1.0 open source version to community.
 
-As for the reason why we choose Typescript, this [post](https://juejin.im/post/59c46bc86fb9a00a4636f939) may give you answer.
+As for the reason why we choose TypeScript, this [post](https://juejin.im/post/59c46bc86fb9a00a4636f939) may give you answer.
 
 ## About
 
-The Midway is a full-stack development solution which developed by the frontend team of Taobao technique department (i.e. Taobao UED). It cooperate with Pandora and Sandbox to perfect the Node.js development experience in new scene.
+The Midway is a full-stack development solution which developed by the frontend team of Taobao technique department (i.e. Taobao UED). It cooperate with Pandora.js and Sandbox to perfect the Node.js development experience in new scene.
 
 ## Quickly start
 
@@ -51,7 +51,7 @@ The structure of Midway is similar to Eggjs, but there are still differences:
 
 * TypeScript code is located in `src/`, and built out `dist/`.
 * The original `app/` is moved to `src/app/`.
-* It is suggested that write your business logic to the `lib/`, such as `lib/service`.
+* It is suggested that write your business logic to other directories, such as `/service`.
 
 ```plain
 ➜  midway6-test tree -I node_modules
@@ -83,9 +83,8 @@ The structure of Midway is similar to Eggjs, but there are still differences:
 │   │   ├── config.prod.ts
 │   │   ├── config.unittest.ts
 │   │   └── plugin.ts
-│   └── lib                             ---- business logics (user define)
+│   └── service                         ---- business logics (user define)
 │   │   └── service                     ---- services (user define)
-│   │       └── user.ts
 │   ├── interface.ts                    ---- interface definition (user define)
 │   ├── app.ts (opt)                    ---- application extend file
 │   └── agent.ts (opt)                  ---- agent extend file
@@ -125,7 +124,7 @@ With the Midway features like automatic scanner and IoC, we don't need to use fi
 
 To quickly use the Midway, you need more things like:
 
-* Learn basic Typescript, there is [quick start](ts_start.md).
+* Learn basic TypeScript, there is [quick start](ts_start.md).
 * Object oriented is recommended, you will feel free if you like `class`.
 * Quick look at IoC and decorators, [introduction  of IoC](ioc.md).
 * If you wanna know more detail about some implicit function, don't forget the [Egg documents](https://eggjs.org/en/intro/), or report us [issue](https://github.com/midwayjs/midway/issues).
@@ -199,6 +198,8 @@ Now you can do it like `src/web/controller`, or you can divide it by business di
 In new ts system, our controller directory is `app/controller`, we  write `*.ts` files inside. Such as the `userController.ts` below, we provide  a interface to get user's information.
 
 ```typescript
+import { provide, controller, inject, get } from 'midway';
+
 @provide()
 @controller('/user')
 export class UserController {
@@ -206,11 +207,14 @@ export class UserController {
   @inject('userService')
   service: IUserService;
 
+  @inject()
+  ctx;
+
   @get('/:id')
-  async getUser(ctx): Promise<void> {
-    const id: number = ctx.params.id;
+  async getUser(): Promise<void> {
+    const id: number = this.ctx.params.id;
     const user: IUserResult = await this.service.getUser({id});
-    ctx.body = {success: true, message: 'OK', data: user};
+    this.ctx.body = {success: true, message: 'OK', data: user};
   }
 }
 ```
@@ -232,11 +236,11 @@ For web request, Midway provide corresponding function decorator of koa-router:
 * @head
 * @all
 
-These decorators is for different async functions, and has the similar meaning of koa-router's. Like original koa2 routers, every router method is async, and got koa context as parameter.
+These decorators is for different async functions, and has the similar meaning of koa-router's. Like original koa2 routers, every router method is async, and got koa context as default parameter.
 
 ```typescript
 @get('/:id')
-async getUser(ctx, next): Promise<void> {
+async getUser(ctx): Promise<void> {
   // TODO ctx...
 }
 ```
@@ -302,7 +306,7 @@ Sometimes we have the need to load middleware on a specific route. In previous v
 Now you can provide a middleware in you application (any directory)，such as `src/app/middleware/api.ts`.
 
 ```ts
-import { WebMiddleware } from 'midway';
+import { Middleware, WebMiddleware, provide } from 'midway';
 
 @provide()
 export class ApiMiddleware implements WebMiddleware {
@@ -310,7 +314,7 @@ export class ApiMiddleware implements WebMiddleware {
   @config('hello')
   helloConfig;
 
-  resolve() {
+  resolve(): Middleware {
     return async (ctx, next) => {
       ctx.api = '222' + this.helloConfig.b;
       await next();
@@ -343,6 +347,74 @@ export class My {
 
 The middleware parameter is provided on route decorators such as `@controller` and `@get/post`.
 
+The middleware parameter here is an array that can pass multiple strings or `koa middleware`.
+
+If it is a string, it will get the result of the `resolve` method of the corresponding `WebMiddleware` interface instance from the IoC container.
+
+You can also set `koa middleware` directly.
+
+```ts
+const mw: Middleware = async (ctx, next) => {
+  ctx.home = '4444';
+  await next();
+};
+
+const newMiddleware = (data): Middleware => {
+  return async (ctx, next) => {
+    ctx.api = data;
+    await next();
+  };
+};
+
+@provide()
+@controller('/', {middleware: ['homeMiddleware', mw]})
+export class My {
+
+  @inject()
+  ctx;
+
+  @get('/api', {middleware: ['apiMiddleware', newMiddleware('5555')]})
+  async index() {
+    this.ctx.body = this.ctx.home + this.ctx.api;
+  }
+}
+
+```
+
+::: tip
+This method is only used for middleware under a certain route.
+
+If you want to use global middleware, please use middleawre  like Egg.js.
+:::
+
+#### Particularity of middleware injection
+
+Due to the special lifecycle of the middleware, it will be loaded (bound) to the route before the application is requested, so it cannot be associated with the context.
+
+The middleware class is fixed as a singleton instance (Singleton), and all injected content is a singleton instance, including but not limited to `@config/@logger/@plugin`.
+
+It's means you can inject a service, but the ctx attribute cannot be injected into this service.
+
+At this point, you must create a request scope instance and context binding by calling `ctx.requestContext.getAsync('xxx')` in the `resolve` method.
+
+```ts
+@provide()
+export class ApiMiddleware implements WebMiddleware {
+
+  @inject()
+  myService;  // this middleware instance is a singleton instance, and can't get ctx even if it is injected.
+
+  resolve(): Middleware {
+    return async (ctx, next) => {
+      // It must be get instance from request scope, and bind context to it.
+      ctx.service = await ctx.requestContext.getAsync('myService');
+      await next();
+    };
+  }
+
+}
+```
+
 ### Mount multiple routes in one method
 
 The new version implements the ability to mount multiple routes on the same method.
@@ -369,42 +441,44 @@ The result of the post and get method are different (get request to mount additi
 
 Midway use [injection](http://web.npm.alibaba-inc.com/package/injection) as default IoC tool. Though `@inject` can satisfy most business logic, for framework there are still places to be extended like plugin, config etc.
 
+### Framework injection by default
+
+By default, the framework injects some attributes to facilitate development. These attributes can be obtained through @inject The decorator is used to inject.
+
+```ts
+@inject()
+appDir; // The root directory of the current project
+
+@inject()
+baseDir;  // The basic directory src or dist of the current project, absolute path
+
+@inject()
+ctx; // Request scope, koa ctx
+
+@inject()
+logger; // Request scope, ContextLogger
+```
+
 ### Plugin inject
 
-Except the `app.xxx` plugin usage which supported by eggjs, Midway support we to inject a plugin by `@plugin`. If we have a plugin named `plugin2`, we could try the new way:
+Except the `app.xxx` plugin usage which supported by eggjs, Midway support we to inject a plugin by `@plugin`.
 
-:::warning Warning
-Cause the midway inner plugin is not store in applicationContext, we couldn't use `@inject` for plugin.
-:::
+Let's take the `egg-jwt` plugin as an example. This plugin provides the `app.jwt` object, and the `@plugin` decorator is similar to taking properties directly from the app object.
+
+For example, `@plugin('jwt')` is actually `app['jwt']`, which can be decoupled from the app object.
 
 ```typescript
+import { provide, plugin } from 'midway';
+
 @provide()
 export class BaseService {
 
-  @plugin('plugin2')
-  plugin;
+  @plugin()
+  jwt;
 
 }
+
 ```
-
-So that we got `this.plugin` in BaseService with `@plugin` by it's name.
-
-::: tip
-Plugin is singleton in Midway.
-:::
-
-### Get plugin name
-
-A plugin name to retrieve from pluginContext is depending on the plugin implement. Midway would use the property name, which was mounted by plugin, as the basic key.
-
-```js
-module.exports = (app) => {
-  // what egg plugins usually do
-  app.plugin1 = xxxx;
-}
-```
-
-Then `plugin1` is the plugin key, Midway will automatically store the object to pluginContext while plugin call app.\[#setter\], so that we can inject it to some property in a class by `@plugin`.
 
 ### Config inject
 
@@ -457,13 +531,13 @@ It is recommended to use `CommonSchedule` interface to standardize your schedule
 
 ### Logger inject
 
-In the past, logger object is mounted on app.loggers. By configure the config file, we can generate different logger object, like `customLogger`:
+In the past, logger object is mounted on app.loggers. By configure the config file, we can generate different logger object, like `myLogger`:
 
 ```typescript
 module.exports = appInfo => {
   return {
     customLogger: {
-      xxLogger: {
+      myLogger: {
         file: path.join(appInfo.root, 'logs/xx.log'),
       },
     },
@@ -477,7 +551,7 @@ Then you can get logger object instance by `@logger`.
 @provide()
 export class BaseService {
 
-  @logger('customLogger')
+  @logger('myLogger')
   logger;
 
 }
@@ -682,7 +756,7 @@ describe('test/controller/home.test.ts', () => {
 
 Cause Midway suggest use IoC way to write service, so it's coding and testing have obvious difference with Eggjs.
 
-Such as `src/lib/service/user.ts`:
+Such as `src/service/user.ts`:
 
 ```typescript
 import { provide } from 'midway';
@@ -728,13 +802,63 @@ describe('test/service/user.test.ts', () => {
 
 app.applicationContext is the application context of IoC Container, we can asynchronizely get the injected service object and use it for testing. Click [midway-test-demo](https://github.com/Lellansin/midway-test-demo) for the whole demo.
 
+### Use Jest
+
+Midway supports Jest as a unit testing framework. Here is the tutorial.
+
+1. Install the following dependencies in the project root directory：
+
+```bash
+$ npm install jest @types/jest ts-jest -D
+```
+
+2. Modify `tsconfig.json` to avoid conflicts between Mocha and Jest type definition files
+
+```json
+{
+  "compilerOptions": {
+    "types": ["jest"]
+  }
+}
+```
+
+3. Add the `jest.config.js` file to the project root directory :
+
+```typescript
+module.exports = {
+  preset: 'ts-jest',
+  testEnvironment: 'midway-bin/jest/env.js'
+};
+```
+
+4. Configure npm scripts :
+
+```json
+{
+  "scripts": {
+    "test": "jest --forceExit"
+  }
+}
+```
+
+5. Run npm scripts :
+
+```bash
+npm run test
+```
+
+::: tip
+We also provide a runable demo: [demo-unittest-jest](https://github.com/midwayjs/midway-examples/tree/4a22e07c661a01aa05221fe56e11dce6c9bfc604/demo-unittest-jest)
+:::
+
+
 ## Deployment
 
 ### Building
 
-Because Typescript is a language that need to compile, so we could using tools like `ts-node` to develop locally. In server side, we hope using the compiled JavaScript code to run for better performance.
+Because TypeScript is a language that need to compile, so we could using tools like `ts-node` to develop locally. In server side, we hope using the compiled JavaScript code to run for better performance.
 
-Thanks to the tool `tsc` which provided by Typescript office to do this job. It will auto load the `tsconfig.json` to do some compiler setups, and Midway has provide a template setup in default, but it can be edited by us freely. And, we provide `build` command to help user simply using it.
+Thanks to the tool `tsc` which provided by TypeScript office to do this job. It will auto load the `tsconfig.json` to do some compiler setups, and Midway has provide a template setup in default, but it can be edited by us freely. And, we provide `build` command to help user simply using it.
 
 ::: tip
 recommend to build in local and try to launch it by `npm run start_build` which could reduce the CI build errors.
@@ -818,10 +942,6 @@ module.exports = {
 ### Lack of Windows support
 
 Due to some library and plugin dependencies compatible limit, the development experience is not perfect on Windows Platform. So we suggest using the Midway on Mac/Linux first.
-
-We just verified Midway by Node.js v10 under the Windows 10, but there is no office support upon others Windows version.
-
-It's recommended that use the more friendly tools like [Hyper](https://hyper.is/) instead of native CLI.
 
 BTW, cause the env sync of Windows, the default template of Midway may need adjust the environments manually. Such as, the `dev` script of package.json, you may use `set` to explicit setup the env like:
 

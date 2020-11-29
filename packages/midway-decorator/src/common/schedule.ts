@@ -11,10 +11,14 @@ export interface ScheduleOpts {
   interval?: number | string;
   immediate?: boolean;
   disable?: boolean;
-  env?: [string];
+  env?: string[];
   cronOptions?: {
-    currentDate: string,
-    endDate: string,
+    currentDate?: string | number | Date
+    startDate?: string | number | Date
+    endDate?: string | number | Date
+    iterator?: boolean
+    utc?: boolean
+    tz?: string
   };
 }
 
